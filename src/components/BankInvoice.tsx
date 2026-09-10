@@ -41,7 +41,7 @@ export const BankInvoice = React.forwardRef<HTMLDivElement, BankInvoiceProps>(
 
     const formattedAmount = Number(invoice.amount).toFixed(2)
 
-    // Filter accounts selected for this invoice, or default to all configured / first account
+    // Filter accounts selected for this invoice, or default to first account
     const selectedAccounts = paymentAccounts.filter((acc) =>
       invoice.payment_methods?.includes(acc.id)
     )
@@ -66,220 +66,254 @@ export const BankInvoice = React.forwardRef<HTMLDivElement, BankInvoiceProps>(
     return (
       <div
         ref={ref}
-        className="bg-white text-black text-[13px] max-w-4xl mx-auto print:m-0 print:p-0 print:shadow-none shadow-sm"
+        className="print-page bg-white text-black text-[12.5px] max-w-4xl mx-auto print:m-0 print:p-0 print:shadow-none shadow-sm flex flex-col justify-between"
         style={{
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
           width: "210mm",
-          minHeight: "297mm",
-          padding: "16mm 20mm 16mm 20mm",
+          height: "297mm",
+          maxHeight: "297mm",
+          padding: "12mm 18mm 12mm 18mm",
           color: "#000",
           boxSizing: "border-box",
+          overflow: "hidden",
         }}
       >
-        {/* Header: Logo and Invoice Meta */}
-        <div className="flex justify-between items-start mb-8">
-          <div>
-            <img
-              src="/themefisher_logo.png"
-              alt="THEMEFISHER"
-              className="h-10 w-auto object-contain"
-            />
-          </div>
-          <div className="text-right">
-            <h1 className="text-[32px] font-normal tracking-tight text-black mb-4 leading-none">
-              Invoice
-            </h1>
-            <div className="space-y-1.5 text-sm">
-              <div className="flex justify-end gap-6">
-                <span className="font-bold">Invoice Date:</span>
-                <span className="w-24 text-right">{invoiceDate}</span>
+        <div>
+          {/* Header: Logo and Invoice Meta */}
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <img
+                src="/themefisher_logo.png"
+                alt="THEMEFISHER"
+                className="h-9 w-auto object-contain"
+              />
+            </div>
+            <div className="text-right">
+              <h1 className="text-[28px] font-normal tracking-tight text-black mb-2 leading-none">
+                Invoice
+              </h1>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-end gap-5">
+                  <span className="font-bold">Invoice Date:</span>
+                  <span className="w-24 text-right">{invoiceDate}</span>
+                </div>
+                <div className="flex justify-end gap-5">
+                  <span className="font-bold">Invoice Number:</span>
+                  <span className="w-24 text-right">{invoice.invoice_number}</span>
+                </div>
               </div>
-              <div className="flex justify-end gap-6">
-                <span className="font-bold">Invoice Number:</span>
-                <span className="w-24 text-right">{invoice.invoice_number}</span>
+            </div>
+          </div>
+
+          {/* Invoice To / Invoice From */}
+          <div className="grid grid-cols-2 gap-6 mb-5 text-xs">
+            <div>
+              <div className="font-bold mb-1 text-gray-700">Invoice to:</div>
+              <div className="font-bold text-sm mb-0.5 text-gray-900">{client.name}</div>
+              <div className="text-gray-800 whitespace-pre-line leading-relaxed text-[12px]">
+                {client.address}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="font-bold mb-1 text-gray-700">Invoice from:</div>
+              <div className="font-bold text-sm mb-0.5 text-gray-900">Themefisher</div>
+              <div className="text-gray-800 leading-relaxed text-[12px]">
+                Appartement A2, House-2G,
+                <br />
+                Shaymoly, Road-1, Dhaka
+                <br />
+                Bangladesh
+              </div>
+              <div className="mt-2 font-medium text-[12px]">BIN: 003271347</div>
+            </div>
+          </div>
+
+          {/* Currency Section */}
+          <div className="border-t border-b border-black py-1.5 px-1 mb-3 flex items-center gap-5 text-xs font-bold">
+            <span className="tracking-wide">CURRENCY-</span>
+            <span>{invoice.currency || "USD"}</span>
+          </div>
+
+          {/* Order Details Section */}
+          <div className="border-b border-black pb-2.5 mb-3 text-xs">
+            <div className="font-bold mb-1">Order details:</div>
+            <div className="flex items-center gap-6">
+              <span className="w-20 font-bold">Product:</span>
+              <span className="font-normal">{invoice.description}</span>
+            </div>
+          </div>
+
+          {/* Billing Summary Section */}
+          <div className="border-b border-black pb-3 mb-3 text-xs">
+            <div className="font-bold mb-1.5">Billing summary:</div>
+            <div className="space-y-1">
+              <div className="flex justify-between items-center">
+                <span>Sales Period</span>
+                <span>
+                  {salesPeriodStart} &nbsp;-&nbsp; {salesPeriodEnd}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Amount Due</span>
+                <span>{formattedAmount}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Sales Tax</span>
+                <span>0</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Sales Tax: %</span>
+                <span>0.00%</span>
+              </div>
+              <div className="border-t border-b border-black py-1 flex justify-between items-center font-bold">
+                <span>Total Amount Due</span>
+                <span>{formattedAmount}</span>
+              </div>
+              <div className="flex justify-between items-center pt-0.5">
+                <span>Payment terms</span>
+                <span>15 Days</span>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Invoice To / Invoice From */}
-        <div className="grid grid-cols-2 gap-8 mb-8 text-sm">
-          <div>
-            <div className="font-bold mb-2">Invoice to:</div>
-            <div className="font-bold text-base mb-1">{client.name}</div>
-            <div className="text-gray-900 whitespace-pre-line leading-relaxed text-[13px]">
-              {client.address}
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="font-bold mb-2">Invoice from:</div>
-            <div className="font-bold text-base mb-1">Themefisher</div>
-            <div className="text-gray-900 leading-relaxed text-[13px]">
-              Appartement A2, House-2G,
-              <br />
-              Shaymoly, Road-1, Dhaka
-              <br />
-              Bangladesh
-            </div>
-            <div className="mt-3 font-medium text-[13px]">BIN: 003271347</div>
-          </div>
-        </div>
-
-        {/* Currency Section */}
-        <div className="border-t border-b border-black py-2 px-1 mb-4 flex items-center gap-6 text-sm font-bold">
-          <span className="tracking-wide">CURRENCY-</span>
-          <span>{invoice.currency || "USD"}</span>
-        </div>
-
-        {/* Order Details Section */}
-        <div className="border-b border-black pb-4 mb-4 text-sm">
-          <div className="font-bold mb-2">Order details:</div>
-          <div className="flex items-center gap-8">
-            <span className="w-24 font-bold">Product:</span>
-            <span className="font-normal">{invoice.description}</span>
-          </div>
-        </div>
-
-        {/* Billing Summary Section */}
-        <div className="border-b border-black pb-4 mb-4 text-sm">
-          <div className="font-bold mb-2">Billing summary:</div>
-          <div className="space-y-1.5">
-            <div className="flex justify-between items-center">
-              <span>Sales Period</span>
-              <span>
-                {salesPeriodStart} &nbsp;-&nbsp; {salesPeriodEnd}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Amount Due</span>
-              <span>{formattedAmount}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Sales Tax</span>
-              <span>0</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span>Sales Tax: %</span>
-              <span>0.00%</span>
-            </div>
-            <div className="border-t border-b border-black py-1.5 flex justify-between items-center font-bold">
-              <span>Total Amount Due</span>
-              <span>{formattedAmount}</span>
-            </div>
-            <div className="flex justify-between items-center pt-1">
-              <span>Payment terms</span>
-              <span>15 Days</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Transfer Information Section */}
-        <div className="text-sm">
-          <div className="font-bold mb-2">Transfer Information:</div>
-          <div className="border border-gray-300 p-4">
-            {isMultiple ? (
-              /* Multiple Accounts: Side-by-side Columns */
-              <div
-                className={`grid gap-4 ${
-                  effectiveAccounts.length === 2 ? "grid-cols-2" : "grid-cols-1 sm:grid-cols-3"
-                }`}
-              >
-                {effectiveAccounts.map((acc) => (
-                  <div
-                    key={acc.id}
-                    className="border border-black p-3.5 space-y-2.5 text-[12px] leading-tight"
-                  >
-                    <div>
-                      <div className="font-bold">Bank Name:</div>
-                      <div className="mt-0.5">{acc.bank_name || acc.account_name}</div>
-                    </div>
-                    {acc.bank_address && (
+          {/* Transfer Information Section */}
+          <div className="text-xs">
+            <div className="font-bold mb-1.5">Transfer Information:</div>
+            <div className="border border-gray-300 p-3">
+              {isMultiple ? (
+                /* Multiple Accounts: Side-by-side Columns */
+                <div
+                  className={`grid gap-3 ${
+                    effectiveAccounts.length === 2 ? "grid-cols-2" : "grid-cols-1 sm:grid-cols-3"
+                  }`}
+                >
+                  {effectiveAccounts.map((acc) => (
+                    <div
+                      key={acc.id}
+                      className="border border-black p-2.5 space-y-2 text-[11.5px] leading-tight"
+                    >
                       <div>
-                        <div className="font-bold">Bank Address:</div>
-                        <div className="mt-0.5 whitespace-pre-line leading-snug">
-                          {acc.bank_address}
+                        <div className="font-bold">Bank Name:</div>
+                        <div className="mt-0.5">{acc.bank_name || acc.account_name}</div>
+                      </div>
+                      {acc.bank_address && (
+                        <div>
+                          <div className="font-bold">Bank Address:</div>
+                          <div className="mt-0.5 whitespace-pre-line leading-snug">
+                            {acc.bank_address}
+                          </div>
+                        </div>
+                      )}
+                      {acc.name_on_account && (
+                        <div>
+                          <div className="font-bold">Name on Account:</div>
+                          <div className="mt-0.5">{acc.name_on_account}</div>
+                        </div>
+                      )}
+                      <div>
+                        <div className="font-bold">Special Instructions/ Notes:</div>
+                        <div className="mt-0.5">
+                          {invoice.description || "Website development Services"}
                         </div>
                       </div>
-                    )}
-                    {acc.name_on_account && (
-                      <div>
-                        <div className="font-bold">Name on Account:</div>
-                        <div className="mt-0.5">{acc.name_on_account}</div>
-                      </div>
-                    )}
-                    <div>
-                      <div className="font-bold">Special Instructions/ Notes:</div>
-                      <div className="mt-0.5">
-                        {invoice.description || "Website development Services"}
-                      </div>
-                    </div>
-                    {acc.bic_swift && (
-                      <div>
-                        <div className="font-bold">BIC/SWIFT:</div>
-                        <div className="mt-0.5 font-mono">{acc.bic_swift}</div>
-                      </div>
-                    )}
-                    {acc.account_number && (
-                      <div>
-                        <div className="font-bold">IBAN/Account Number:</div>
-                        <div className="mt-0.5 font-mono">{acc.account_number}</div>
-                      </div>
-                    )}
-                    {!acc.bank_address && !acc.bic_swift && acc.account_details && (
-                      <div>
-                        <div className="font-bold">Account Details:</div>
-                        <div className="mt-0.5 whitespace-pre-line text-[11px] text-gray-700">
-                          {acc.account_details}
+                      {acc.bic_swift && (
+                        <div>
+                          <div className="font-bold">BIC/SWIFT:</div>
+                          <div className="mt-0.5 font-mono">{acc.bic_swift}</div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              /* Single Account: Sits on the left, matching PDF */
-              <div className="border border-black p-4 w-[330px] space-y-3 text-[12.5px] leading-tight">
-                <div>
-                  <div className="font-bold">Bank Name:</div>
-                  <div className="mt-0.5">
-                    {effectiveAccounts[0].bank_name || effectiveAccounts[0].account_name}
-                  </div>
+                      )}
+                      {acc.account_number && (
+                        <div>
+                          <div className="font-bold">IBAN/Account Number:</div>
+                          <div className="mt-0.5 font-mono">{acc.account_number}</div>
+                        </div>
+                      )}
+                      {!acc.bank_address && !acc.bic_swift && acc.account_details && (
+                        <div>
+                          <div className="font-bold">Account Details:</div>
+                          <div className="mt-0.5 whitespace-pre-line text-[11px] text-gray-700">
+                            {acc.account_details}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-                {effectiveAccounts[0].bank_address && (
+              ) : (
+                /* Single Account: Sits on the left, matching PDF */
+                <div className="border border-black p-3 w-[320px] space-y-2 text-[11.5px] leading-tight">
                   <div>
-                    <div className="font-bold">Bank Address:</div>
-                    <div className="mt-0.5 whitespace-pre-line leading-snug">
-                      {effectiveAccounts[0].bank_address}
+                    <div className="font-bold">Bank Name:</div>
+                    <div className="mt-0.5">
+                      {effectiveAccounts[0].bank_name || effectiveAccounts[0].account_name}
                     </div>
                   </div>
-                )}
-                {effectiveAccounts[0].name_on_account && (
+                  {effectiveAccounts[0].bank_address && (
+                    <div>
+                      <div className="font-bold">Bank Address:</div>
+                      <div className="mt-0.5 whitespace-pre-line leading-snug">
+                        {effectiveAccounts[0].bank_address}
+                      </div>
+                    </div>
+                  )}
+                  {effectiveAccounts[0].name_on_account && (
+                    <div>
+                      <div className="font-bold">Name on Account:</div>
+                      <div className="mt-0.5">{effectiveAccounts[0].name_on_account}</div>
+                    </div>
+                  )}
                   <div>
-                    <div className="font-bold">Name on Account:</div>
-                    <div className="mt-0.5">{effectiveAccounts[0].name_on_account}</div>
+                    <div className="font-bold">Special Instructions/ Notes:</div>
+                    <div className="mt-0.5">
+                      {invoice.description || "Website development Services"}
+                    </div>
                   </div>
-                )}
-                <div>
-                  <div className="font-bold">Special Instructions/ Notes:</div>
-                  <div className="mt-0.5">
-                    {invoice.description || "Website development Services"}
-                  </div>
+                  {effectiveAccounts[0].bic_swift && (
+                    <div>
+                      <div className="font-bold">BIC/SWIFT:</div>
+                      <div className="mt-0.5 font-mono">{effectiveAccounts[0].bic_swift}</div>
+                    </div>
+                  )}
+                  {effectiveAccounts[0].account_number && (
+                    <div>
+                      <div className="font-bold">IBAN/Account Number:</div>
+                      <div className="mt-0.5 font-mono">{effectiveAccounts[0].account_number}</div>
+                    </div>
+                  )}
                 </div>
-                {effectiveAccounts[0].bic_swift && (
-                  <div>
-                    <div className="font-bold">BIC/SWIFT:</div>
-                    <div className="mt-0.5 font-mono">{effectiveAccounts[0].bic_swift}</div>
-                  </div>
-                )}
-                {effectiveAccounts[0].account_number && (
-                  <div>
-                    <div className="font-bold">IBAN/Account Number:</div>
-                    <div className="mt-0.5 font-mono">{effectiveAccounts[0].account_number}</div>
-                  </div>
-                )}
-              </div>
-            )}
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Terms & Conditions AND Bottom Signature */}
+        <div className="pt-3 border-t border-gray-300 flex justify-between items-end gap-6 text-[11px] leading-tight mt-3">
+          <div className="max-w-[65%] space-y-1 text-gray-700">
+            <div className="font-bold text-gray-900 text-xs tracking-wide">
+              Terms &amp; Conditions
+            </div>
+            <div>
+              <span className="font-semibold text-gray-900">Payment Terms:</span> Payment is
+              strictly due within 15 days from the invoice date via bank transfer or credit card.
+            </div>
+            <div>
+              <span className="font-semibold text-gray-900">Disputes &amp; Ownership:</span>{" "}
+              Discrepancies must be reported within 7 days of receipt; goods/services remain company
+              property until paid in full.
+            </div>
+          </div>
+
+          <div className="text-right shrink-0">
+            <div className="text-[11px] text-gray-600 mb-0.5">Authorized Signature</div>
+            <div className="inline-block border-b border-gray-400 pb-0.5 px-2">
+              <img
+                src="/signature.png"
+                alt="Signature"
+                className="h-8 w-auto object-contain inline-block"
+              />
+            </div>
+            <div className="text-xs font-bold text-gray-900 mt-1">Themefisher</div>
           </div>
         </div>
       </div>
