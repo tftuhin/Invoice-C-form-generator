@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Invoice and C Form Generator
+
+A modern Next.js application to generate and print Bangladesh Bank Form-C (Declaration for inward remittance on account of ICT-related services) and accompanying Bank Invoices for clients.
+
+## Features
+
+- **Document Generation**: One-click print & PDF export for:
+  - **Form-C (ICT)**: Official inward remittance declaration format.
+  - **Bank Invoice**: Clean and structured invoice with client details and payment transfer info.
+- **Invoice Creation**: Auto-numbered invoice generation (`TF-YYYY-MM-DD-XX`) with flexible payment method assignment.
+- **Client Management**: Add, update, and manage international clients and their remitting bank details.
+- **Payment & Bank Configuration**: Configure payout bank accounts with Bank Name, Name on Account, IBAN/Account Number/ID, BIC/SWIFT, and Bank Address.
+- **Modern Light UI**: Responsive, clean light sidebar with intuitive navigation.
+
+## Tech Stack
+
+- **Framework**: [Next.js](https://nextjs.org/) (App Router)
+- **UI & Styling**: React 19, Tailwind CSS v4, Lucide React
+- **Forms & Printing**: `react-hook-form`, `react-to-print`, `date-fns`
+- **Database**: [Supabase](https://supabase.com/) (PostgreSQL with Row Level Security)
 
 ## Getting Started
 
-First, run the development server:
-
+### 1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone git@github.com:tftuhin/Invoice-C-form-generator.git
+cd Invoice-C-form-generator
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Setup Database (Supabase)
+Run the SQL script provided in [`supabase_schema.sql`](./supabase_schema.sql) in your Supabase SQL Editor to create the required tables:
+- `clients`
+- `payment_accounts`
+- `invoices`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Configure Environment Variables
+Copy the example environment file and add your Supabase credentials:
+```bash
+cp .env.local.example .env.local
+```
 
-## Learn More
+Update `.env.local` with your project URL and public anon key:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 5. Run the development server
+```bash
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+MIT
