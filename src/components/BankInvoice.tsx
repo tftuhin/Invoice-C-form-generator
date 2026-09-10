@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- Standard img tags required for react-to-print rasterization reliability */
 import React from "react"
 import { format } from "date-fns"
 import type { Invoice, Client, PaymentAccount } from "@/types"

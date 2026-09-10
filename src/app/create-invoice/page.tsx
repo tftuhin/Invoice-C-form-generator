@@ -94,7 +94,7 @@ export default function CreateInvoicePage() {
             ? [data.payment_methods]
             : []
 
-    const payload: Record<string, any> = {
+    const payload: Record<string, unknown> = {
       client_id: data.client_id,
       invoice_number: data.invoice_number,
       invoice_date: data.invoice_date,
@@ -109,7 +109,7 @@ export default function CreateInvoicePage() {
       payment_methods: paymentMethodsArray,
     }
 
-    let { data: insertedData, error } = await supabase
+    let { error } = await supabase
       .from("invoices")
       .insert([payload])
       .select()
@@ -121,7 +121,6 @@ export default function CreateInvoicePage() {
         .from("invoices")
         .insert([payload])
         .select()
-      insertedData = fallbackRes.data
       error = fallbackRes.error
     }
 
@@ -191,11 +190,6 @@ export default function CreateInvoicePage() {
     })
   }, [invoices, tableClientFilter, searchTerm, clients])
 
-  // Reset pagination on filter
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, tableClientFilter])
-
   const totalPages = Math.ceil(tableInvoices.length / pageSize) || 1
   const paginatedInvoices = useMemo(() => {
     const start = (currentPage - 1) * pageSize
@@ -213,19 +207,19 @@ export default function CreateInvoicePage() {
       </div>
 
       {/* TOP: Invoice Creation Form */}
-      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-xs border border-gray-200">
+      <div className="bg-white p-5 sm:p-8 rounded-2xl shadow-xs border border-gray-200">
         <div className="flex items-center gap-2 mb-6 pb-4 border-b border-gray-100">
           <PlusCircle className="w-5 h-5 text-blue-600" />
-          <h2 className="text-lg font-bold text-gray-900">New Invoice Details</h2>
+          <h2 className="text-base sm:text-lg font-bold text-gray-900">New Invoice Details</h2>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Client</label>
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Client</label>
               <select
                 {...register("client_id", { required: true })}
-                className="block w-full p-2.5 border rounded-lg border-gray-300 bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                className="block w-full p-2.5 border rounded-lg border-gray-300 bg-white text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
               >
                 <option value="">Select a client...</option>
                 {clients.map((c) => (
@@ -237,28 +231,28 @@ export default function CreateInvoicePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Invoice Number</label>
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Invoice Number</label>
               <input
                 {...register("invoice_number", { required: true })}
-                className="block w-full p-2.5 border rounded-lg border-gray-300 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Invoice Date</label>
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Invoice Date</label>
               <input
                 type="date"
                 {...register("invoice_date", { required: true })}
-                className="block w-full p-2.5 border rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Currency</label>
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Currency</label>
               <select
                 {...register("currency")}
                 defaultValue="USD"
-                className="block w-full p-2.5 border rounded-lg border-gray-300 bg-white text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                className="block w-full p-2.5 border rounded-lg border-gray-300 bg-white text-base sm:text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
               >
                 <option value="USD">USD ($ - US Dollar)</option>
                 <option value="BDT">BDT (৳ - Bangladeshi Taka)</option>
@@ -271,36 +265,36 @@ export default function CreateInvoicePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Invoice Amount</label>
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Invoice Amount</label>
               <input
                 type="number"
                 step="0.01"
                 {...register("amount", { required: true })}
-                className="block w-full p-2.5 border rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
                 placeholder="0.00"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
                 Remitted / Received Amount
               </label>
               <input
                 type="number"
                 step="0.01"
                 {...register("received_amount")}
-                className="block w-full p-2.5 border rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
                 placeholder="Optional received amount"
               />
             </div>
 
             <div className="col-span-1 md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
                 Description (Service Details)
               </label>
               <input
                 {...register("description", { required: true })}
-                className="block w-full p-2.5 border rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
                 placeholder="e.g. Website Maintenance Service"
               />
             </div>
@@ -396,24 +390,30 @@ export default function CreateInvoicePage() {
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
             {/* Search Input */}
-            <div className="relative min-w-[220px]">
+            <div className="relative flex-1 sm:w-64 min-w-0">
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search invoice, client..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  setCurrentPage(1)
+                }}
+                className="w-full pl-9 pr-3 py-2 sm:py-1.5 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white focus:outline-hidden"
               />
             </div>
 
             {/* Client Filter */}
             <select
               value={tableClientFilter}
-              onChange={(e) => setTableClientFilter(e.target.value)}
-              className="py-1.5 px-3 text-xs sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              onChange={(e) => {
+                setTableClientFilter(e.target.value)
+                setCurrentPage(1)
+              }}
+              className="py-2 sm:py-1.5 px-3 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white focus:outline-hidden"
             >
               <option value="">All Clients</option>
               {clients.map((c) => (
@@ -515,8 +515,8 @@ export default function CreateInvoicePage() {
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="p-4 border-t border-gray-100 flex items-center justify-between text-xs sm:text-sm text-gray-600 bg-gray-50/40">
-            <div>
+          <div className="p-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0 text-xs sm:text-sm text-gray-600 bg-gray-50/40">
+            <div className="text-center sm:text-left">
               Showing <span className="font-semibold">{(currentPage - 1) * pageSize + 1}</span> to{" "}
               <span className="font-semibold">
                 {Math.min(currentPage * pageSize, tableInvoices.length)}

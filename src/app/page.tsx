@@ -90,16 +90,16 @@ function GenerateDocsContent() {
         </Link>
       </div>
 
-      <div className="bg-white p-6 rounded-2xl shadow-xs border border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="bg-white p-5 sm:p-6 rounded-2xl shadow-xs border border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Select Client</label>
+          <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Select Client</label>
           <select
             value={selectedClientId}
             onChange={(e) => {
               setSelectedClientId(e.target.value)
               setSelectedInvoiceId("")
             }}
-            className="block w-full p-2.5 border rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white focus:outline-hidden"
           >
             <option value="">-- Choose a Client --</option>
             {clients.map((c) => (
@@ -110,12 +110,12 @@ function GenerateDocsContent() {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Select Invoice</label>
+          <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Select Invoice</label>
           <select
             value={selectedInvoiceId}
             onChange={(e) => setSelectedInvoiceId(e.target.value)}
             disabled={!selectedClientId}
-            className="block w-full p-2.5 border rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white disabled:bg-gray-100"
+            className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white disabled:bg-gray-100 focus:outline-hidden"
           >
             <option value="">-- Choose an Invoice --</option>
             {filteredInvoices.map((i) => (
@@ -131,11 +131,11 @@ function GenerateDocsContent() {
         <div className="space-y-6">
           {/* Document switcher tabs */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-3">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 max-w-full">
               <button
                 type="button"
                 onClick={() => setActiveTab("all")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   activeTab === "all"
                     ? "bg-gray-900 text-white shadow-xs"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -146,7 +146,7 @@ function GenerateDocsContent() {
               <button
                 type="button"
                 onClick={() => setActiveTab("invoice")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   activeTab === "invoice"
                     ? "bg-gray-900 text-white shadow-xs"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -157,7 +157,7 @@ function GenerateDocsContent() {
               <button
                 type="button"
                 onClick={() => setActiveTab("cform")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   activeTab === "cform"
                     ? "bg-gray-900 text-white shadow-xs"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -167,12 +167,12 @@ function GenerateDocsContent() {
               </button>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
               {(activeTab === "all" || activeTab === "invoice") && (
                 <button
                   type="button"
                   onClick={() => handlePrintBankInvoice()}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-xs transition-colors cursor-pointer"
+                  className="flex-1 sm:flex-none justify-center flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-xs transition-colors cursor-pointer"
                 >
                   <Printer className="w-4 h-4" />
                   Print Invoice
@@ -182,7 +182,7 @@ function GenerateDocsContent() {
                 <button
                   type="button"
                   onClick={() => handlePrintCForm()}
-                  className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-xs transition-colors cursor-pointer"
+                  className="flex-1 sm:flex-none justify-center flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-xs transition-colors cursor-pointer"
                 >
                   <FileText className="w-4 h-4" />
                   Print Form-C
@@ -193,11 +193,11 @@ function GenerateDocsContent() {
 
           {/* Bank Invoice Preview */}
           {(activeTab === "all" || activeTab === "invoice") && (
-            <div className="border border-gray-200 rounded-xl overflow-hidden shadow-xs bg-gray-100/90 p-6 sm:p-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-blue-600" />
-                  Bank Invoice Preview
+            <div className="border border-gray-200 rounded-xl overflow-hidden shadow-xs bg-gray-100/90 p-3 sm:p-6 md:p-8">
+              <div className="flex justify-between items-center mb-3 sm:mb-4 gap-2 flex-wrap">
+                <h2 className="text-base sm:text-lg font-bold text-gray-800 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0" />
+                  <span>Bank Invoice Preview</span>
                 </h2>
                 <button
                   type="button"
@@ -208,8 +208,11 @@ function GenerateDocsContent() {
                   Print / Save PDF
                 </button>
               </div>
-              <div className="overflow-x-auto bg-gray-100/90 flex justify-center py-4">
-                <div className="shadow-xl rounded-sm">
+              <p className="sm:hidden text-center text-[11px] text-gray-500 mb-2">
+                ← Swipe horizontally to view full page →
+              </p>
+              <div className="overflow-x-auto bg-gray-100/90 flex justify-start sm:justify-center py-2 sm:py-4">
+                <div className="shadow-xl rounded-xs shrink-0">
                   <BankInvoice
                     ref={bankInvoiceRef}
                     invoice={selectedInvoice}
@@ -223,11 +226,11 @@ function GenerateDocsContent() {
 
           {/* Form-C (ICT) Preview */}
           {(activeTab === "all" || activeTab === "cform") && (
-            <div className="border border-gray-200 rounded-xl overflow-hidden shadow-xs bg-gray-100/90 p-6 sm:p-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                  Form–C (ICT) Preview
+            <div className="border border-gray-200 rounded-xl overflow-hidden shadow-xs bg-gray-100/90 p-3 sm:p-6 md:p-8">
+              <div className="flex justify-between items-center mb-3 sm:mb-4 gap-2 flex-wrap">
+                <h2 className="text-base sm:text-lg font-bold text-gray-800 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <span>Form–C (ICT) Preview</span>
                 </h2>
                 <button
                   type="button"
@@ -238,8 +241,11 @@ function GenerateDocsContent() {
                   Print / Save PDF
                 </button>
               </div>
-              <div className="overflow-x-auto bg-gray-100/90 flex justify-center py-4">
-                <div className="shadow-xl rounded-sm">
+              <p className="sm:hidden text-center text-[11px] text-gray-500 mb-2">
+                ← Swipe horizontally to view full page →
+              </p>
+              <div className="overflow-x-auto bg-gray-100/90 flex justify-start sm:justify-center py-2 sm:py-4">
+                <div className="shadow-xl rounded-xs shrink-0">
                   <CForm
                     ref={cFormRef}
                     invoice={selectedInvoice}
@@ -254,7 +260,7 @@ function GenerateDocsContent() {
       )}
 
       {(!selectedClient || !selectedInvoice) && (
-        <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-12 text-center shadow-xs">
+        <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-8 sm:p-12 text-center shadow-xs">
           <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3">
             <FileText className="w-6 h-6" />
           </div>

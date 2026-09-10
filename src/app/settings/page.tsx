@@ -3,22 +3,26 @@ import { useState, useEffect, useCallback } from "react"
 import { supabase } from "@/lib/supabase"
 import { useForm } from "react-hook-form"
 import type { PaymentAccount, PaymentAccountFormData } from "@/types"
-import { Landmark, Trash2, Building2, User, CreditCard, Globe, MapPin, AlertCircle } from "lucide-react"
+import { Landmark, Trash2, Building2, User, CreditCard, MapPin, AlertCircle } from "lucide-react"
 
-function normalizeAccount(acc: any): PaymentAccount {
+function normalizeAccount(acc: Record<string, unknown>): PaymentAccount {
   let detailsObj: Record<string, string> = {}
-  if (acc.account_details && typeof acc.account_details === "string" && acc.account_details.trim().startsWith("{")) {
+  if (typeof acc.account_details === "string" && acc.account_details.trim().startsWith("{")) {
     try {
       detailsObj = JSON.parse(acc.account_details)
     } catch {}
   }
+  const getStr = (val: unknown) => (typeof val === "string" ? val : "")
   return {
-    ...acc,
-    bank_name: acc.bank_name || detailsObj.bank_name || acc.account_name || "",
-    bank_address: acc.bank_address || detailsObj.bank_address || "",
-    name_on_account: acc.name_on_account || detailsObj.name_on_account || "",
-    bic_swift: acc.bic_swift || detailsObj.bic_swift || "",
-    account_number: acc.account_number || detailsObj.account_number || "",
+    id: getStr(acc.id),
+    bank_name: getStr(acc.bank_name) || detailsObj.bank_name || getStr(acc.account_name) || "",
+    bank_address: getStr(acc.bank_address) || detailsObj.bank_address || "",
+    name_on_account: getStr(acc.name_on_account) || detailsObj.name_on_account || "",
+    bic_swift: getStr(acc.bic_swift) || detailsObj.bic_swift || "",
+    account_number: getStr(acc.account_number) || detailsObj.account_number || "",
+    account_name: getStr(acc.account_name),
+    account_details: getStr(acc.account_details),
+    created_at: typeof acc.created_at === "string" ? acc.created_at : undefined,
   }
 }
 
@@ -172,22 +176,22 @@ export default function SettingsPage() {
 
       {/* Add Payment Account Card */}
       <div className="bg-white rounded-xl shadow-xs border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2.5 bg-gray-50/50">
+        <div className="px-5 sm:px-6 py-4 border-b border-gray-100 flex items-center gap-2.5 bg-gray-50/50">
           <Landmark className="w-5 h-5 text-blue-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Add Bank / Payment Account</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900">Add Bank / Payment Account</h2>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-5 sm:p-6 space-y-4 sm:space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             {/* Bank Name (Mandatory) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                 Bank Name <span className="text-red-500 font-semibold">*</span>
               </label>
               <div className="relative">
                 <input
                   {...register("bank_name", { required: "Bank Name is required" })}
-                  className={`w-full px-3.5 py-2.5 border rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 ${
+                  className={`w-full px-3.5 py-2.5 border rounded-lg text-base sm:text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 ${
                     errors.bank_name ? "border-red-300 bg-red-50/30" : "border-gray-300 bg-white"
                   }`}
                   placeholder="e.g. Standard Chartered Bank or Wise"
@@ -200,13 +204,13 @@ export default function SettingsPage() {
 
             {/* Name on Account (Mandatory) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                 Name on Account <span className="text-red-500 font-semibold">*</span>
               </label>
               <div className="relative">
                 <input
                   {...register("name_on_account", { required: "Name on Account is required" })}
-                  className={`w-full px-3.5 py-2.5 border rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 ${
+                  className={`w-full px-3.5 py-2.5 border rounded-lg text-base sm:text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 ${
                     errors.name_on_account ? "border-red-300 bg-red-50/30" : "border-gray-300 bg-white"
                   }`}
                   placeholder="e.g. Themefisher LLC or Account Holder Name"
@@ -219,13 +223,13 @@ export default function SettingsPage() {
 
             {/* IBAN / Account Number / Account ID (Mandatory) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                 IBAN/Account Number/Account ID <span className="text-red-500 font-semibold">*</span>
               </label>
               <div className="relative">
                 <input
                   {...register("account_number", { required: "IBAN/Account Number/Account ID is required" })}
-                  className={`w-full px-3.5 py-2.5 border rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 ${
+                  className={`w-full px-3.5 py-2.5 border rounded-lg text-base sm:text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 ${
                     errors.account_number ? "border-red-300 bg-red-50/30" : "border-gray-300 bg-white"
                   }`}
                   placeholder="e.g. 0001914137101 or GB29 XXXXX"
@@ -238,13 +242,13 @@ export default function SettingsPage() {
 
             {/* BIC / SWIFT (Optional) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                 BIC/SWIFT <span className="text-xs text-gray-400 font-normal">(Optional)</span>
               </label>
               <div className="relative">
                 <input
                   {...register("bic_swift")}
-                  className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-white"
+                  className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-base sm:text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-white"
                   placeholder="e.g. SCBLBDDX"
                 />
               </div>
@@ -253,13 +257,13 @@ export default function SettingsPage() {
 
           {/* Bank Address (Optional) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
               Bank Address <span className="text-xs text-gray-400 font-normal">(Optional)</span>
             </label>
             <textarea
               {...register("bank_address")}
               rows={2}
-              className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-white"
+              className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-base sm:text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-white"
               placeholder="e.g. 1 Basinghall Avenue, London, EC2V 5DD, United Kingdom"
             ></textarea>
           </div>
@@ -268,7 +272,7 @@ export default function SettingsPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors shadow-xs disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto justify-center bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 font-medium text-sm transition-colors shadow-xs disabled:opacity-50 flex items-center gap-2 cursor-pointer"
             >
               {submitting ? "Saving..." : "Add Bank Account"}
             </button>
@@ -278,17 +282,17 @@ export default function SettingsPage() {
 
       {/* Existing Accounts List */}
       <div className="bg-white rounded-xl shadow-xs border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+        <div className="px-5 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <div className="flex items-center gap-2.5">
             <Building2 className="w-5 h-5 text-gray-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Existing Accounts</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Existing Accounts</h2>
           </div>
           <span className="text-xs font-medium px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full">
             {accounts.length} {accounts.length === 1 ? "account" : "accounts"}
           </span>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {loading ? (
             <p className="text-gray-500 text-sm py-4">Loading accounts...</p>
           ) : accounts.length === 0 ? (
@@ -302,16 +306,16 @@ export default function SettingsPage() {
               {accounts.map((acc) => (
                 <div
                   key={acc.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors bg-white relative group"
+                  className="border border-gray-200 rounded-lg p-3.5 sm:p-4 hover:border-gray-300 transition-colors bg-white relative group"
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-gray-900 text-base">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="space-y-2 flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-gray-900 text-sm sm:text-base break-words">
                           {acc.bank_name || acc.account_name || "Unnamed Bank"}
                         </span>
                         {acc.bic_swift && (
-                          <span className="text-xs px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-mono font-medium border border-blue-100">
+                          <span className="text-xs px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-mono font-medium border border-blue-100 shrink-0">
                             SWIFT: {acc.bic_swift}
                           </span>
                         )}
