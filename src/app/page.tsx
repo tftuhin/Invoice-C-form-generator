@@ -8,6 +8,7 @@ import type { Client, Invoice, PaymentAccount } from "@/types"
 import { Printer, FileText, CheckCircle2, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
+import SearchableClientSelect from "@/components/SearchableClientSelect"
 
 type ViewTab = "all" | "invoice" | "cform"
 
@@ -91,25 +92,19 @@ function GenerateDocsContent() {
       </div>
 
       <div className="bg-white p-5 sm:p-6 rounded-2xl shadow-xs border border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-        <div>
+        <div className="relative z-20">
           <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Select Client</label>
-          <select
+          <SearchableClientSelect
+            clients={clients}
             value={selectedClientId}
-            onChange={(e) => {
-              setSelectedClientId(e.target.value)
+            onChange={(val) => {
+              setSelectedClientId(val)
               setSelectedInvoiceId("")
             }}
-            className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white focus:outline-hidden"
-          >
-            <option value="">-- Choose a Client --</option>
-            {clients.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+            placeholder="-- Choose a Client --"
+          />
         </div>
-        <div>
+        <div className="relative z-10">
           <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Select Invoice</label>
           <select
             value={selectedInvoiceId}

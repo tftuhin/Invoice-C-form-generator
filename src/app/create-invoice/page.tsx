@@ -15,6 +15,7 @@ import {
   ExternalLink,
 } from "lucide-react"
 import Link from "next/link"
+import SearchableClientSelect from "@/components/SearchableClientSelect"
 
 export default function CreateInvoicePage() {
   const [clients, setClients] = useState<Client[]>([])
@@ -22,6 +23,7 @@ export default function CreateInvoicePage() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [selectedPaymentMethods, setSelectedPaymentMethods] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
+  const [selectedClientId, setSelectedClientId] = useState("")
   const { register, handleSubmit, reset, setValue } = useForm<InvoiceFormData>()
 
   // Invoices list state
@@ -84,6 +86,12 @@ export default function CreateInvoicePage() {
   }
 
   const onSubmit = async (data: InvoiceFormData) => {
+    const clientId = selectedClientId || data.client_id
+    if (!clientId) {
+      alert("Please select a client.")
+      return
+    }
+
     const cleanInvoiceNumber = data.invoice_number?.trim()
     if (!cleanInvoiceNumber) {
       alert("Invoice number is required.")
@@ -125,7 +133,7 @@ export default function CreateInvoicePage() {
             : []
 
     const payload: Record<string, unknown> = {
-      client_id: data.client_id,
+      client_id: clientId,
       invoice_number: cleanInvoiceNumber,
       invoice_date: data.invoice_date,
       currency: data.currency || "USD",
@@ -155,6 +163,7 @@ export default function CreateInvoicePage() {
     if (!error) {
       alert("Invoice created successfully!")
       reset()
+      setSelectedClientId("")
       const dateStr = new Date().toISOString().split("T")[0]
       setValue("invoice_number", `TF-${dateStr}-01`)
       setValue("invoice_date", dateStr)
@@ -243,22 +252,20 @@ export default function CreateInvoicePage() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            <div>
+            <div className="relative z-20">
               <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Client</label>
-              <select
-                {...register("client_id", { required: true })}
-                className="block w-full p-2.5 border rounded-lg border-gray-300 bg-white text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
-              >
-                <option value="">Select a client...</option>
-                {clients.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              <SearchableClientSelect
+                clients={clients}
+                value={selectedClientId}
+                onChange={(val) => {
+                  setSelectedClientId(val)
+                  setValue("client_id", val)
+                }}
+                placeholder="Select a client..."
+              />
             </div>
 
-            <div>
+            <div className="relative z-10">
               <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Invoice Number</label>
               <input
                 {...register("invoice_number", { required: true })}

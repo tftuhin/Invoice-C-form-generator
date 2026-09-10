@@ -3,6 +3,7 @@ import { useState } from "react"
 import { supabase } from "@/lib/supabase"
 import type { Client, Invoice, PaymentAccount } from "@/types"
 import { X, Save } from "lucide-react"
+import SearchableClientSelect from "@/components/SearchableClientSelect"
 
 interface EditInvoiceModalProps {
   invoice: Invoice | null
@@ -173,23 +174,17 @@ function EditInvoiceForm({
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
+          <div className="relative z-20">
             <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
               Client
             </label>
-            <select
+            <SearchableClientSelect
+              clients={clients}
               value={clientId}
-              onChange={(e) => setClientId(e.target.value)}
+              onChange={(val) => setClientId(val)}
+              placeholder="Select a client..."
               required
-              className="w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-            >
-              <option value="">Select a client...</option>
-              {clients.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            />
           </div>
 
           <div>
