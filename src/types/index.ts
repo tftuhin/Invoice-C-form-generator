@@ -2,6 +2,7 @@ export interface Client {
   id: string
   name: string
   address: string
+  tax_id?: string
   bank_name: string
   bank_address: string
   created_at?: string
@@ -10,6 +11,7 @@ export interface Client {
 export interface ClientFormData {
   name: string
   address: string
+  tax_id?: string
   bank_name: string
   bank_address: string
 }

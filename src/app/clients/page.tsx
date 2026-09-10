@@ -14,6 +14,7 @@ import {
   PlusCircle,
   Users,
   CheckCircle2,
+  FileText,
 } from "lucide-react"
 
 export default function ClientsPage() {
@@ -64,14 +65,28 @@ export default function ClientsPage() {
 
   const onSubmit = async (data: ClientFormData) => {
     setSubmitting(true)
-    const { error } = await supabase.from("clients").insert([
-      {
-        name: data.name.trim(),
-        address: data.address?.trim() || null,
-        bank_name: data.bank_name?.trim() || null,
-        bank_address: data.bank_address?.trim() || null,
-      },
-    ])
+    const payload: Record<string, any> = {
+      name: data.name.trim(),
+      address: data.address?.trim() || null,
+      tax_id: data.tax_id?.trim() || null,
+      bank_name: data.bank_name?.trim() || null,
+      bank_address: data.bank_address?.trim() || null,
+    }
+
+    let { error } = await supabase.from("clients").insert([payload])
+
+    // Fallback if 'tax_id' column doesn't exist yet in Supabase
+    if (error && (error.code === "42703" || error.message?.includes("tax_id"))) {
+      delete payload.tax_id
+      const fallbackRes = await supabase.from("clients").insert([payload])
+      error = fallbackRes.error
+      if (!error && data.tax_id?.trim()) {
+        alert(
+          "Client added! Note: To permanently store VAT/Tax IDs in Supabase, please run this in your Supabase SQL Editor:\n\nALTER TABLE clients ADD COLUMN IF NOT EXISTS tax_id TEXT;"
+        )
+      }
+    }
+
     setSubmitting(false)
 
     if (!error) {
@@ -111,6 +126,7 @@ export default function ClientsPage() {
       (c) =>
         c.name.toLowerCase().includes(q) ||
         (c.address && c.address.toLowerCase().includes(q)) ||
+        (c.tax_id && c.tax_id.toLowerCase().includes(q)) ||
         (c.bank_name && c.bank_name.toLowerCase().includes(q))
     )
   }, [clients, searchTerm])
@@ -153,6 +169,18 @@ export default function ClientsPage() {
                 {...register("address")}
                 className="block w-full p-2.5 border rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
                 placeholder="Full billing address"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5 text-gray-400" />
+                VAT / Tax ID <span className="text-xs font-normal text-gray-500">(Optional)</span>
+              </label>
+              <input
+                {...register("tax_id")}
+                className="block w-full p-2.5 border rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                placeholder="e.g. EU123456789 or Tax ID"
               />
             </div>
 
@@ -232,8 +260,13 @@ export default function ClientsPage() {
                 className="p-6 hover:bg-gray-50/70 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 <div className="space-y-1.5 flex-1 min-w-0 pr-4">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="font-bold text-base text-gray-900 truncate">{client.name}</h3>
+                    {client.tax_id && (
+                      <span className="text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md shrink-0">
+                        VAT/Tax ID: {client.tax_id}
+                      </span>
+                    )}
                   </div>
 
                   {client.address && (

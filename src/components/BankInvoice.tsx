@@ -114,6 +114,11 @@ export const BankInvoice = React.forwardRef<HTMLDivElement, BankInvoiceProps>(
               <div className="text-gray-800 whitespace-pre-line leading-relaxed text-[12px]">
                 {client.address}
               </div>
+              {client.tax_id && (
+                <div className="mt-1.5 font-medium text-[12px] text-gray-800">
+                  VAT/Tax ID: {client.tax_id}
+                </div>
+              )}
             </div>
             <div className="text-right">
               <div className="font-bold mb-1 text-gray-700">Invoice from:</div>

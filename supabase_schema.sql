@@ -11,10 +11,14 @@ CREATE TABLE IF NOT EXISTS clients (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   address TEXT,
+  tax_id TEXT,
   bank_name TEXT,
   bank_address TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Migration for existing databases
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS tax_id TEXT;
 
 ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
 
