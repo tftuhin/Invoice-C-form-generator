@@ -7,6 +7,7 @@ import type { Client, PaymentAccount, InvoiceFormData } from "@/types"
 export default function CreateInvoicePage() {
   const [clients, setClients] = useState<Client[]>([])
   const [accounts, setAccounts] = useState<PaymentAccount[]>([])
+  const [selectedPaymentMethods, setSelectedPaymentMethods] = useState<string[]>([])
   const { register, handleSubmit, reset, setValue } = useForm<InvoiceFormData>()
 
   useEffect(() => {
@@ -18,7 +19,14 @@ export default function CreateInvoicePage() {
       ])
       if (!ignore) {
         if (clientsRes.data) setClients(clientsRes.data as Client[])
-        if (accountsRes.data) setAccounts(accountsRes.data as PaymentAccount[])
+        if (accountsRes.data) {
+          const accs = accountsRes.data as PaymentAccount[]
+          setAccounts(accs)
+          if (accs.length > 0) {
+            setSelectedPaymentMethods([accs[0].id])
+            setValue("payment_methods", [accs[0].id])
+          }
+        }
 
         // Auto-generate invoice number format TF-YYYY-MM-DD-01
         const dateStr = new Date().toISOString().split("T")[0]
@@ -33,13 +41,23 @@ export default function CreateInvoicePage() {
     }
   }, [setValue])
 
+  const toggleAccount = (id: string) => {
+    const next = selectedPaymentMethods.includes(id)
+      ? selectedPaymentMethods.filter((item) => item !== id)
+      : [...selectedPaymentMethods, id]
+    setSelectedPaymentMethods(next)
+    setValue("payment_methods", next)
+  }
+
   const onSubmit = async (data: InvoiceFormData) => {
-    const rawPaymentMethods = data.payment_methods
-    const paymentMethodsArray = Array.isArray(rawPaymentMethods)
-      ? rawPaymentMethods
-      : rawPaymentMethods
-        ? [rawPaymentMethods]
-        : []
+    const paymentMethodsArray =
+      selectedPaymentMethods.length > 0
+        ? selectedPaymentMethods
+        : Array.isArray(data.payment_methods)
+          ? data.payment_methods
+          : data.payment_methods
+            ? [data.payment_methods]
+            : []
 
     const payload: Record<string, any> = {
       client_id: data.client_id,
@@ -72,13 +90,19 @@ export default function CreateInvoicePage() {
       setValue("invoice_number", `TF-${dateStr}-01`)
       setValue("invoice_date", dateStr)
       setValue("currency", "USD")
+      if (accounts.length > 0) {
+        setSelectedPaymentMethods([accounts[0].id])
+        setValue("payment_methods", [accounts[0].id])
+      } else {
+        setSelectedPaymentMethods([])
+      }
     } else {
       alert("Error creating invoice: " + error.message)
     }
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8 pb-12">
       <div>
         <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Create Invoice</h1>
         <p className="text-sm text-gray-500 mt-1">Generate a new client billing record and assign payment accounts.</p>
@@ -167,23 +191,72 @@ export default function CreateInvoicePage() {
               />
             </div>
 
+            {/* Payment Bank Account Selector as Checkboxes */}
             <div className="col-span-1 md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">Payment Bank Account(s)</label>
-              <select
-                multiple
-                {...register("payment_methods")}
-                className="mt-1 block w-full p-2.5 border rounded-lg border-gray-300 h-28 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 focus:outline-none"
-              >
-                {accounts.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.bank_name || a.account_name}
-                    {a.account_number ? ` - ${a.account_number}` : ""}
-                    {a.name_on_account ? ` (${a.name_on_account})` : ""}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500 mt-1.5">
-                Select your payment bank for transfer instructions (Hold Cmd/Ctrl to select multiple)
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Payment Bank Account(s)
+              </label>
+              <div className="space-y-3">
+                {accounts.map((a) => {
+                  const isChecked = selectedPaymentMethods.includes(a.id)
+                  return (
+                    <div
+                      key={a.id}
+                      onClick={() => toggleAccount(a.id)}
+                      className={`flex items-start gap-3.5 p-3.5 border rounded-xl cursor-pointer transition-all select-none ${
+                        isChecked
+                          ? "border-blue-600 bg-blue-50/60 shadow-xs"
+                          : "border-gray-200 hover:border-gray-300 bg-white"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleAccount(a.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-4 h-4 mt-0.5 rounded text-blue-600 border-gray-300 focus:ring-blue-500 cursor-pointer"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-bold text-gray-900">
+                            {a.bank_name || a.account_name}
+                          </span>
+                          {a.bic_swift && (
+                            <span className="text-xs font-mono bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                              SWIFT: {a.bic_swift}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-600 mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                          {a.account_number && (
+                            <span>
+                              <strong className="text-gray-700">Account:</strong>{" "}
+                              <span className="font-mono">{a.account_number}</span>
+                            </span>
+                          )}
+                          {a.name_on_account && (
+                            <span>
+                              <strong className="text-gray-700">Name:</strong> {a.name_on_account}
+                            </span>
+                          )}
+                        </div>
+                        {a.bank_address && (
+                          <div className="text-[11px] text-gray-500 mt-1 truncate">
+                            {a.bank_address}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+                {accounts.length === 0 && (
+                  <div className="p-4 border border-dashed border-gray-300 rounded-xl text-center text-sm text-gray-500">
+                    No payment accounts configured. Add one in Configuration.
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Check the payment bank account(s) to include in the invoice transfer instructions.
               </p>
             </div>
           </div>
