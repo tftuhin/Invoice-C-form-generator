@@ -46,10 +46,6 @@ function GenerateDocsContent() {
             return
           }
         }
-
-        if (clientList.length > 0 && !selectedClientId) {
-          setSelectedClientId(clientList[0].id)
-        }
       }
     }
     void fetchData()
@@ -59,15 +55,6 @@ function GenerateDocsContent() {
   }, [queryInvoiceId])
 
   const filteredInvoices = invoices.filter((i) => i.client_id === selectedClientId)
-
-  useEffect(() => {
-    if (
-      filteredInvoices.length > 0 &&
-      (!selectedInvoiceId || !filteredInvoices.some((inv) => inv.id === selectedInvoiceId))
-    ) {
-      setSelectedInvoiceId(filteredInvoices[0].id)
-    }
-  }, [selectedClientId, filteredInvoices, selectedInvoiceId])
 
   const selectedClient = clients.find((c) => c.id === selectedClientId)
   const selectedInvoice = invoices.find((i) => i.id === selectedInvoiceId)
@@ -110,6 +97,7 @@ function GenerateDocsContent() {
             value={selectedClientId}
             onChange={(e) => {
               setSelectedClientId(e.target.value)
+              setSelectedInvoiceId("")
             }}
             className="block w-full p-2.5 border rounded-lg border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
           >
@@ -262,6 +250,22 @@ function GenerateDocsContent() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {(!selectedClient || !selectedInvoice) && (
+        <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-12 text-center shadow-xs">
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3">
+            <FileText className="w-6 h-6" />
+          </div>
+          <h3 className="text-base font-bold text-gray-900 mb-1">
+            {!selectedClientId ? "Select a Client to Begin" : "Select an Invoice to Preview"}
+          </h3>
+          <p className="text-xs text-gray-500 max-w-sm mx-auto">
+            {!selectedClientId
+              ? "Choose a client from the dropdown above to view their available invoices."
+              : "Choose an invoice above to preview and export pixel-perfect Bank Invoices and Form-C declarations."}
+          </p>
         </div>
       )}
     </div>
