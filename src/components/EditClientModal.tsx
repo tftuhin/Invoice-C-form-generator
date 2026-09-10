@@ -72,7 +72,8 @@ function EditClientForm({
     setSaving(false)
 
     if (error) {
-      setErrorMsg("Failed to update client: " + error.message)
+      console.error("Failed to update client:", error.message)
+      setErrorMsg("Unable to update client details. Please try again.")
     } else {
       const updatedClient = data && data[0] ? (data[0] as Client) : { ...client, ...updatePayload }
       onSaved(updatedClient)
@@ -119,6 +120,7 @@ function EditClientForm({
           <input
             type="text"
             required
+            maxLength={120}
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Paddle.com Market Ltd"
@@ -133,6 +135,7 @@ function EditClientForm({
           </label>
           <textarea
             rows={3}
+            maxLength={300}
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             placeholder="Full billing address"
@@ -147,6 +150,7 @@ function EditClientForm({
           </label>
           <input
             type="text"
+            maxLength={50}
             value={taxId}
             onChange={(e) => setTaxId(e.target.value)}
             placeholder="e.g. EU123456789 or Tax ID"
@@ -166,6 +170,7 @@ function EditClientForm({
               </label>
               <input
                 type="text"
+                maxLength={120}
                 value={bankName}
                 onChange={(e) => setBankName(e.target.value)}
                 placeholder="e.g. Barclays Bank PLC"
@@ -180,6 +185,7 @@ function EditClientForm({
               </label>
               <input
                 type="text"
+                maxLength={250}
                 value={bankAddress}
                 onChange={(e) => setBankAddress(e.target.value)}
                 placeholder="Branch, City & Country"

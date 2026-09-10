@@ -63,9 +63,15 @@ export default function ClientsPage() {
   }, [])
 
   const onSubmit = async (data: ClientFormData) => {
+    const cleanName = data.name?.trim()
+    if (!cleanName) {
+      alert("Client name is required.")
+      return
+    }
+
     setSubmitting(true)
     const payload: Record<string, unknown> = {
-      name: data.name.trim(),
+      name: cleanName,
       address: data.address?.trim() || null,
       tax_id: data.tax_id?.trim() || null,
       bank_name: data.bank_name?.trim() || null,
@@ -92,7 +98,8 @@ export default function ClientsPage() {
       reset()
       await fetchClients()
     } else {
-      alert("Error creating client: " + error.message)
+      console.error("Error creating client:", error.message)
+      alert("Unable to create client. Please try again.")
     }
   }
 
@@ -113,7 +120,8 @@ export default function ClientsPage() {
     if (!error) {
       setClients((prev) => prev.filter((c) => c.id !== client.id))
     } else {
-      alert("Error deleting client: " + error.message)
+      console.error("Error deleting client:", error.message)
+      alert("Unable to delete client. Please try again.")
     }
   }
 
@@ -154,6 +162,7 @@ export default function ClientsPage() {
               </label>
               <input
                 {...register("name", { required: true })}
+                maxLength={120}
                 className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
                 placeholder="Client or company name"
               />
@@ -166,6 +175,7 @@ export default function ClientsPage() {
               </label>
               <input
                 {...register("address")}
+                maxLength={300}
                 className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
                 placeholder="Full billing address"
               />
@@ -178,6 +188,7 @@ export default function ClientsPage() {
               </label>
               <input
                 {...register("tax_id")}
+                maxLength={50}
                 className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
                 placeholder="e.g. EU123456789 or Tax ID"
               />
@@ -190,6 +201,7 @@ export default function ClientsPage() {
               </label>
               <input
                 {...register("bank_name")}
+                maxLength={120}
                 className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
                 placeholder="e.g. Barclays Bank PLC"
               />
@@ -202,6 +214,7 @@ export default function ClientsPage() {
               </label>
               <input
                 {...register("bank_address")}
+                maxLength={250}
                 className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
                 placeholder="Branch, City & Country"
               />

@@ -84,6 +84,36 @@ export default function CreateInvoicePage() {
   }
 
   const onSubmit = async (data: InvoiceFormData) => {
+    const cleanInvoiceNumber = data.invoice_number?.trim()
+    if (!cleanInvoiceNumber) {
+      alert("Invoice number is required.")
+      return
+    }
+
+    const cleanDescription = data.description?.trim()
+    if (!cleanDescription) {
+      alert("Please enter a service description.")
+      return
+    }
+
+    const parsedAmount = typeof data.amount === "string" ? parseFloat(data.amount) : Number(data.amount)
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      alert("Please enter a valid invoice amount greater than 0.")
+      return
+    }
+
+    let parsedReceived = 0
+    if (data.received_amount !== undefined && data.received_amount !== "") {
+      parsedReceived =
+        typeof data.received_amount === "string"
+          ? parseFloat(data.received_amount)
+          : Number(data.received_amount)
+      if (isNaN(parsedReceived) || parsedReceived < 0) {
+        alert("Received amount cannot be negative.")
+        return
+      }
+    }
+
     setSubmitting(true)
     const paymentMethodsArray =
       selectedPaymentMethods.length > 0
@@ -96,16 +126,12 @@ export default function CreateInvoicePage() {
 
     const payload: Record<string, unknown> = {
       client_id: data.client_id,
-      invoice_number: data.invoice_number,
+      invoice_number: cleanInvoiceNumber,
       invoice_date: data.invoice_date,
       currency: data.currency || "USD",
-      amount: typeof data.amount === "string" ? parseFloat(data.amount) : data.amount,
-      description: data.description,
-      received_amount: data.received_amount
-        ? typeof data.received_amount === "string"
-          ? parseFloat(data.received_amount)
-          : data.received_amount
-        : 0,
+      amount: parsedAmount,
+      description: cleanDescription,
+      received_amount: parsedReceived,
       payment_methods: paymentMethodsArray,
     }
 
@@ -141,7 +167,8 @@ export default function CreateInvoicePage() {
       }
       await fetchInvoices()
     } else {
-      alert("Error creating invoice: " + error.message)
+      console.error("Error creating invoice:", error.message)
+      alert("Unable to save invoice. Please verify invoice details and try again.")
     }
   }
 
@@ -164,7 +191,8 @@ export default function CreateInvoicePage() {
 
     const { error } = await supabase.from("invoices").delete().eq("id", inv.id)
     if (error) {
-      alert("Error deleting invoice: " + error.message)
+      console.error("Error deleting invoice:", error.message)
+      alert("Unable to delete invoice. Please try again.")
       return
     }
 
@@ -234,6 +262,7 @@ export default function CreateInvoicePage() {
               <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">Invoice Number</label>
               <input
                 {...register("invoice_number", { required: true })}
+                maxLength={60}
                 className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
               />
             </div>
@@ -269,6 +298,8 @@ export default function CreateInvoicePage() {
               <input
                 type="number"
                 step="0.01"
+                min="0.01"
+                max="999999999"
                 {...register("amount", { required: true })}
                 className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
                 placeholder="0.00"
@@ -282,6 +313,8 @@ export default function CreateInvoicePage() {
               <input
                 type="number"
                 step="0.01"
+                min="0"
+                max="999999999"
                 {...register("received_amount")}
                 className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
                 placeholder="Optional received amount"
@@ -294,6 +327,7 @@ export default function CreateInvoicePage() {
               </label>
               <input
                 {...register("description", { required: true })}
+                maxLength={300}
                 className="block w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-hidden"
                 placeholder="e.g. Website Maintenance Service"
               />

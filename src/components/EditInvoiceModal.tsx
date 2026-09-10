@@ -78,24 +78,41 @@ function EditInvoiceForm({
       setErrorMsg("Please select a client.")
       return
     }
-    if (!invoiceNumber.trim()) {
+
+    const cleanInvoiceNumber = invoiceNumber.trim()
+    if (!cleanInvoiceNumber) {
       setErrorMsg("Invoice number is required.")
+      return
+    }
+
+    const cleanDescription = description.trim()
+    if (!cleanDescription) {
+      setErrorMsg("Description is required.")
+      return
+    }
+
+    const parsedAmount = parseFloat(amount)
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      setErrorMsg("Please enter a valid invoice amount greater than 0.")
+      return
+    }
+
+    const parsedReceived = receivedAmount ? parseFloat(receivedAmount) : 0
+    if (isNaN(parsedReceived) || parsedReceived < 0) {
+      setErrorMsg("Received amount cannot be negative.")
       return
     }
 
     setSaving(true)
     setErrorMsg("")
 
-    const parsedAmount = parseFloat(amount) || 0
-    const parsedReceived = receivedAmount ? parseFloat(receivedAmount) : 0
-
     const updatePayload: Record<string, unknown> = {
       client_id: clientId,
-      invoice_number: invoiceNumber.trim(),
+      invoice_number: cleanInvoiceNumber,
       invoice_date: invoiceDate,
       currency: currency || "USD",
       amount: parsedAmount,
-      description: description.trim(),
+      description: cleanDescription,
       received_amount: parsedReceived,
       payment_methods: paymentMethods,
     }
@@ -121,7 +138,8 @@ function EditInvoiceForm({
     setSaving(false)
 
     if (error) {
-      setErrorMsg("Failed to update invoice: " + error.message)
+      console.error("Failed to update invoice:", error.message)
+      setErrorMsg("Unable to update invoice. Please try again.")
     } else {
       const updatedItem = data && data[0] ? (data[0] as Invoice) : { ...invoice, ...updatePayload }
       onSaved(updatedItem)
@@ -181,6 +199,7 @@ function EditInvoiceForm({
             <input
               type="text"
               value={invoiceNumber}
+              maxLength={60}
               onChange={(e) => setInvoiceNumber(e.target.value)}
               required
               className="w-full p-2.5 border rounded-lg border-gray-300 text-base sm:text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -226,6 +245,8 @@ function EditInvoiceForm({
             <input
               type="number"
               step="0.01"
+              min="0.01"
+              max="999999999"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               required
@@ -240,6 +261,8 @@ function EditInvoiceForm({
             <input
               type="number"
               step="0.01"
+              min="0"
+              max="999999999"
               value={receivedAmount}
               onChange={(e) => setReceivedAmount(e.target.value)}
               placeholder="Optional received amount"
@@ -253,6 +276,7 @@ function EditInvoiceForm({
             </label>
             <input
               type="text"
+              maxLength={300}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               required

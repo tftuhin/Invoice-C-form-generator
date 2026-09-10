@@ -87,24 +87,43 @@ export default function SettingsPage() {
   }, [])
 
   const onSubmit = async (data: PaymentAccountFormData) => {
+    const cleanBankName = data.bank_name?.trim()
+    const cleanNameOnAccount = data.name_on_account?.trim()
+    const cleanAccountNumber = data.account_number?.trim()
+    const cleanBicSwift = data.bic_swift ? data.bic_swift.trim().toUpperCase().replace(/\s+/g, "") : null
+    const cleanBankAddress = data.bank_address?.trim() || null
+
+    if (!cleanBankName) {
+      alert("Bank Name is required.")
+      return
+    }
+    if (!cleanNameOnAccount) {
+      alert("Name on Account is required.")
+      return
+    }
+    if (!cleanAccountNumber) {
+      alert("Account / IBAN Number is required.")
+      return
+    }
+
     setSubmitting(true)
-    const accountName = data.bank_name
+    const accountName = cleanBankName
     const accountDetails = [
-      `Name on Account: ${data.name_on_account}`,
-      `IBAN/Account Number/Account ID: ${data.account_number}`,
-      data.bic_swift ? `BIC/SWIFT: ${data.bic_swift}` : "",
-      data.bank_address ? `Bank Address: ${data.bank_address}` : "",
+      `Name on Account: ${cleanNameOnAccount}`,
+      `IBAN/Account Number/Account ID: ${cleanAccountNumber}`,
+      cleanBicSwift ? `BIC/SWIFT: ${cleanBicSwift}` : "",
+      cleanBankAddress ? `Bank Address: ${cleanBankAddress}` : "",
     ]
       .filter(Boolean)
       .join("\n")
 
     // Full structured payload
     const payload = {
-      bank_name: data.bank_name,
-      bank_address: data.bank_address?.trim() || null,
-      name_on_account: data.name_on_account,
-      bic_swift: data.bic_swift?.trim() || null,
-      account_number: data.account_number,
+      bank_name: cleanBankName,
+      bank_address: cleanBankAddress,
+      name_on_account: cleanNameOnAccount,
+      bic_swift: cleanBicSwift,
+      account_number: cleanAccountNumber,
       account_name: accountName,
       account_details: accountDetails,
     }
@@ -116,11 +135,11 @@ export default function SettingsPage() {
       const fallbackPayload = {
         account_name: accountName,
         account_details: JSON.stringify({
-          bank_name: data.bank_name,
-          bank_address: data.bank_address || "",
-          name_on_account: data.name_on_account,
-          bic_swift: data.bic_swift || "",
-          account_number: data.account_number,
+          bank_name: cleanBankName,
+          bank_address: cleanBankAddress || "",
+          name_on_account: cleanNameOnAccount,
+          bic_swift: cleanBicSwift || "",
+          account_number: cleanAccountNumber,
         }),
       }
       const fallbackRes = await supabase.from("payment_accounts").insert([fallbackPayload])
@@ -139,7 +158,8 @@ export default function SettingsPage() {
           "The 'payment_accounts' table does not exist in Supabase yet. Please run the SQL schema from 'supabase_schema.sql' in your Supabase SQL editor."
         )
       } else {
-        alert("Error saving account: " + error.message)
+        console.error("Error saving account:", error.message)
+        alert("Unable to save bank account. Please verify details and try again.")
       }
     }
   }
@@ -150,7 +170,8 @@ export default function SettingsPage() {
     if (!error) {
       await fetchAccounts()
     } else {
-      alert("Error deleting account: " + error.message)
+      console.error("Error deleting account:", error.message)
+      alert("Unable to delete account. Please try again.")
     }
   }
 
@@ -191,6 +212,7 @@ export default function SettingsPage() {
               <div className="relative">
                 <input
                   {...register("bank_name", { required: "Bank Name is required" })}
+                  maxLength={120}
                   className={`w-full px-3.5 py-2.5 border rounded-lg text-base sm:text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 ${
                     errors.bank_name ? "border-red-300 bg-red-50/30" : "border-gray-300 bg-white"
                   }`}
@@ -210,6 +232,7 @@ export default function SettingsPage() {
               <div className="relative">
                 <input
                   {...register("name_on_account", { required: "Name on Account is required" })}
+                  maxLength={120}
                   className={`w-full px-3.5 py-2.5 border rounded-lg text-base sm:text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 ${
                     errors.name_on_account ? "border-red-300 bg-red-50/30" : "border-gray-300 bg-white"
                   }`}
@@ -229,6 +252,7 @@ export default function SettingsPage() {
               <div className="relative">
                 <input
                   {...register("account_number", { required: "IBAN/Account Number/Account ID is required" })}
+                  maxLength={50}
                   className={`w-full px-3.5 py-2.5 border rounded-lg text-base sm:text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 ${
                     errors.account_number ? "border-red-300 bg-red-50/30" : "border-gray-300 bg-white"
                   }`}
@@ -248,6 +272,7 @@ export default function SettingsPage() {
               <div className="relative">
                 <input
                   {...register("bic_swift")}
+                  maxLength={20}
                   className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-base sm:text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-white"
                   placeholder="e.g. SCBLBDDX"
                 />
@@ -263,6 +288,7 @@ export default function SettingsPage() {
             <textarea
               {...register("bank_address")}
               rows={2}
+              maxLength={300}
               className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-base sm:text-sm transition-colors focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 bg-white"
               placeholder="e.g. 1 Basinghall Avenue, London, EC2V 5DD, United Kingdom"
             ></textarea>

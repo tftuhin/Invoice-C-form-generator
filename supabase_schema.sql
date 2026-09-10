@@ -79,3 +79,23 @@ CREATE POLICY "Allow anonymous read access on invoices" ON invoices FOR SELECT U
 CREATE POLICY "Allow anonymous insert access on invoices" ON invoices FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow anonymous update access on invoices" ON invoices FOR UPDATE USING (true);
 CREATE POLICY "Allow anonymous delete access on invoices" ON invoices FOR DELETE USING (true);
+
+-- =========================================================
+-- 4. SECURITY & PRIVACY HARDENING (RECOMMENDED FOR PRODUCTION)
+-- =========================================================
+-- By default, anonymous policies above allow full CRUD with the public anon key.
+-- For production environments where only authenticated staff should delete/modify records:
+--
+-- Option A: Prevent accidental or malicious bulk deletes by dropping anonymous DELETE policies:
+-- DROP POLICY IF EXISTS "Allow anonymous delete access on invoices" ON invoices;
+-- DROP POLICY IF EXISTS "Allow anonymous delete access on clients" ON clients;
+-- DROP POLICY IF EXISTS "Allow anonymous delete access on payment_accounts" ON payment_accounts;
+--
+-- Option B: If connecting Supabase Auth (authenticated users only):
+-- CREATE POLICY "Allow authenticated users full access on invoices" ON invoices
+--   FOR ALL TO authenticated USING (true) WITH CHECK (true);
+-- CREATE POLICY "Allow authenticated users full access on clients" ON clients
+--   FOR ALL TO authenticated USING (true) WITH CHECK (true);
+-- CREATE POLICY "Allow authenticated users full access on payment_accounts" ON payment_accounts
+--   FOR ALL TO authenticated USING (true) WITH CHECK (true);
+-- =========================================================
