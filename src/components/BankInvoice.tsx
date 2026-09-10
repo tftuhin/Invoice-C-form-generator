@@ -183,62 +183,57 @@ export const BankInvoice = React.forwardRef<HTMLDivElement, BankInvoiceProps>(
             <div className="border border-gray-300 p-3">
               {isMultiple ? (
                 /* Multiple Accounts: Side-by-side Columns */
-                <div
-                  className={`grid gap-3 ${
-                    effectiveAccounts.length === 2 ? "grid-cols-2" : "grid-cols-1 sm:grid-cols-3"
-                  }`}
-                >
-                  {effectiveAccounts.map((acc) => (
-                    <div
-                      key={acc.id}
-                      className="border border-black p-2.5 space-y-2 text-[11.5px] leading-tight"
-                    >
-                      <div>
-                        <div className="font-bold">Bank Name:</div>
-                        <div className="mt-0.5">{acc.bank_name || acc.account_name}</div>
-                      </div>
-                      {acc.bank_address && (
+                <div className="space-y-2.5">
+                  <div
+                    className={`grid gap-3 ${
+                      effectiveAccounts.length === 2 ? "grid-cols-2" : "grid-cols-1 sm:grid-cols-3"
+                    }`}
+                  >
+                    {effectiveAccounts.map((acc) => (
+                      <div
+                        key={acc.id}
+                        className="border border-black p-2.5 space-y-2 text-[11.5px] leading-tight"
+                      >
                         <div>
-                          <div className="font-bold">Bank Address:</div>
-                          <div className="mt-0.5 whitespace-pre-line leading-snug">
-                            {acc.bank_address}
+                          <div className="font-bold">Bank Name:</div>
+                          <div className="mt-0.5">{acc.bank_name || acc.account_name}</div>
+                        </div>
+                        {acc.bank_address && (
+                          <div>
+                            <div className="font-bold">Bank Address:</div>
+                            <div className="mt-0.5 whitespace-pre-line leading-snug">
+                              {acc.bank_address}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                      {acc.name_on_account && (
-                        <div>
-                          <div className="font-bold">Name on Account:</div>
-                          <div className="mt-0.5">{acc.name_on_account}</div>
-                        </div>
-                      )}
-                      <div>
-                        <div className="font-bold">Special Instructions/ Notes:</div>
-                        <div className="mt-0.5">
-                          {invoice.description || "Website development Services"}
-                        </div>
-                      </div>
-                      {acc.bic_swift && (
-                        <div>
-                          <div className="font-bold">BIC/SWIFT:</div>
-                          <div className="mt-0.5 font-mono">{acc.bic_swift}</div>
-                        </div>
-                      )}
-                      {acc.account_number && (
-                        <div>
-                          <div className="font-bold">IBAN/Account Number:</div>
-                          <div className="mt-0.5 font-mono">{acc.account_number}</div>
-                        </div>
-                      )}
-                      {!acc.bank_address && !acc.bic_swift && acc.account_details && (
-                        <div>
-                          <div className="font-bold">Account Details:</div>
-                          <div className="mt-0.5 whitespace-pre-line text-[11px] text-gray-700">
-                            {acc.account_details}
+                        )}
+                        {acc.name_on_account && (
+                          <div>
+                            <div className="font-bold">Name on Account:</div>
+                            <div className="mt-0.5">{acc.name_on_account}</div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                        {acc.bic_swift && (
+                          <div>
+                            <div className="font-bold">BIC/SWIFT:</div>
+                            <div className="mt-0.5 font-mono">{acc.bic_swift}</div>
+                          </div>
+                        )}
+                        {acc.account_number && (
+                          <div>
+                            <div className="font-bold">IBAN/Account Number:</div>
+                            <div className="mt-0.5 font-mono">{acc.account_number}</div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="text-[11.5px] pt-1">
+                    <div className="font-bold">Special Instructions/ Notes:</div>
+                    <div className="mt-0.5">
+                      {invoice.description || "Website development Services"}
                     </div>
-                  ))}
+                  </div>
                 </div>
               ) : (
                 /* Single Account: Sits on the left, matching PDF */
