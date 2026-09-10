@@ -8,194 +8,194 @@ interface BankInvoiceProps {
   paymentAccounts: PaymentAccount[]
 }
 
+function parseInvoiceDate(dateStr?: string): Date {
+  if (!dateStr) return new Date()
+  const d = new Date(dateStr)
+  if (!isNaN(d.getTime())) return d
+  const parts = dateStr.split(/[-/ ]/)
+  if (parts.length === 3) {
+    const day = parseInt(parts[0], 10)
+    const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
+    const month = months.indexOf(parts[1].toLowerCase())
+    let year = parseInt(parts[2], 10)
+    if (year < 100) year += 2000
+    if (!isNaN(day) && month !== -1 && !isNaN(year)) {
+      return new Date(year, month, day)
+    }
+  }
+  return new Date()
+}
+
 export const BankInvoice = React.forwardRef<HTMLDivElement, BankInvoiceProps>(
   ({ invoice, client, paymentAccounts }, ref) => {
     if (!invoice || !client) return <div ref={ref}></div>
 
-    // Format dates safely
-    let invoiceDate = ""
-    try {
-      if (invoice.invoice_date) {
-        invoiceDate = format(new Date(invoice.invoice_date), "yyyy-MM-dd")
-      }
-    } catch {
-      invoiceDate = invoice.invoice_date || ""
-    }
+    const parsedDate = parseInvoiceDate(invoice.invoice_date)
+    const invoiceDate = format(parsedDate, "d-MMM-yy")
 
-    const periodStart = invoiceDate
-    const periodEnd = invoiceDate // Simplified for now
+    // Sales period is start of month to end of month for that invoice
+    const startOfMonth = new Date(parsedDate.getFullYear(), parsedDate.getMonth(), 1)
+    const endOfMonth = new Date(parsedDate.getFullYear(), parsedDate.getMonth() + 1, 0)
+    const salesPeriodStart = format(startOfMonth, "d-MMM-yyyy")
+    const salesPeriodEnd = format(endOfMonth, "d-MMM-yyyy")
+
+    const formattedAmount = Number(invoice.amount).toFixed(2)
 
     const selectedAccounts = paymentAccounts.filter((acc) =>
       invoice.payment_methods?.includes(acc.id)
     )
+    const primaryAccount = selectedAccounts[0] || paymentAccounts[0]
+
+    const bankName = primaryAccount?.bank_name || "Standard Chartered bank"
+    const bankAddress =
+      primaryAccount?.bank_address || "67 Gulshan Avenue, Gulshan, Dhaka\n1212, Bangladesh"
+    const nameOnAccount = primaryAccount?.name_on_account || "Themefisher"
+    const specialInstructions = invoice.description || "Website development Services"
+    const bicSwift = primaryAccount?.bic_swift || "SCBLBDDXXXX"
+    const accountNumber = primaryAccount?.account_number || "01914137101"
 
     return (
       <div
         ref={ref}
-        className="bg-white text-black p-12 text-sm max-w-4xl mx-auto"
-        style={{ fontFamily: "sans-serif", width: "210mm", minHeight: "297mm" }}
+        className="bg-white text-black text-[13px] max-w-4xl mx-auto print:m-0 print:p-0 print:shadow-none shadow-sm"
+        style={{
+          fontFamily:
+            '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+          width: "210mm",
+          minHeight: "297mm",
+          padding: "16mm 20mm 16mm 20mm",
+          color: "#000",
+          boxSizing: "border-box",
+        }}
       >
-        <div className="flex justify-between mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 tracking-wider">INVOICE</h1>
+        {/* Header: Logo and Invoice Meta */}
+        <div className="flex justify-between items-start mb-8">
+          <div>
+            <img
+              src="/themefisher_logo.png"
+              alt="THEMEFISHER"
+              className="h-10 w-auto object-contain"
+            />
+          </div>
           <div className="text-right">
-            <div className="flex justify-end gap-4">
-              <span className="font-semibold text-gray-600">Invoice Date:</span>
-              <span>{invoiceDate}</span>
-            </div>
-            <div className="flex justify-end gap-4 mt-1">
-              <span className="font-semibold text-gray-600">Invoice Number:</span>
-              <span>{invoice.invoice_number}</span>
+            <h1 className="text-[32px] font-normal tracking-tight text-black mb-4 leading-none">
+              Invoice
+            </h1>
+            <div className="space-y-1.5 text-sm">
+              <div className="flex justify-end gap-6">
+                <span className="font-bold">Invoice Date:</span>
+                <span className="w-24 text-right">{invoiceDate}</span>
+              </div>
+              <div className="flex justify-end gap-6">
+                <span className="font-bold">Invoice Number:</span>
+                <span className="w-24 text-right">{invoice.invoice_number}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-12 mb-12">
+        {/* Invoice To / Invoice From */}
+        <div className="grid grid-cols-2 gap-8 mb-8 text-sm">
           <div>
-            <h3 className="font-bold text-gray-600 mb-2 border-b pb-1">Invoice to:</h3>
-            <div className="font-bold text-lg mb-1">{client.name}</div>
-            <div className="whitespace-pre-wrap text-gray-700">{client.address}</div>
+            <div className="font-bold mb-2">Invoice to:</div>
+            <div className="font-bold text-base mb-1">{client.name}</div>
+            <div className="text-gray-900 whitespace-pre-line leading-relaxed text-[13px]">
+              {client.address}
+            </div>
           </div>
-          <div>
-            <h3 className="font-bold text-gray-600 mb-2 border-b pb-1">Invoice from:</h3>
-            <div className="font-bold text-lg mb-1">Themefisher</div>
-            <div className="text-gray-700 leading-relaxed">
+          <div className="text-right">
+            <div className="font-bold mb-2">Invoice from:</div>
+            <div className="font-bold text-base mb-1">Themefisher</div>
+            <div className="text-gray-900 leading-relaxed text-[13px]">
               Appartement A2, House-2G,
               <br />
               Shaymoly, Road-1, Dhaka
               <br />
               Bangladesh
-              <br />
-              <br />
-              BIN: 003271347
+            </div>
+            <div className="mt-3 font-medium text-[13px]">BIN: 003271347</div>
+          </div>
+        </div>
+
+        {/* Currency Section */}
+        <div className="border-t border-b border-black py-2 px-1 mb-4 flex items-center gap-6 text-sm font-bold">
+          <span className="tracking-wide">CURRENCY-</span>
+          <span>{invoice.currency || "USD"}</span>
+        </div>
+
+        {/* Order Details Section */}
+        <div className="border-b border-black pb-4 mb-4 text-sm">
+          <div className="font-bold mb-2">Order details:</div>
+          <div className="flex items-center gap-8">
+            <span className="w-24 font-bold">Product:</span>
+            <span className="font-normal">{invoice.description}</span>
+          </div>
+        </div>
+
+        {/* Billing Summary Section */}
+        <div className="border-b border-black pb-4 mb-4 text-sm">
+          <div className="font-bold mb-2">Billing summary:</div>
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <span>Sales Period</span>
+              <span>
+                {salesPeriodStart} &nbsp;-&nbsp; {salesPeriodEnd}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>Amount Due</span>
+              <span>{formattedAmount}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>Sales Tax</span>
+              <span>0</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>Sales Tax: %</span>
+              <span>0.00%</span>
+            </div>
+            <div className="border-t border-b border-black py-1.5 flex justify-between items-center font-bold">
+              <span>Total Amount Due</span>
+              <span>{formattedAmount}</span>
+            </div>
+            <div className="flex justify-between items-center pt-1">
+              <span>Payment terms</span>
+              <span>15 Days</span>
             </div>
           </div>
         </div>
 
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="font-bold text-gray-600">CURRENCY -</span>{" "}
-            <span className="font-semibold">{invoice.currency || "USD"}</span>
-          </div>
-
-          <h3 className="font-bold text-gray-600 mb-2">Order details:</h3>
-          <table className="w-full mb-8">
-            <tbody>
-              <tr className="border-b border-t">
-                <td className="py-3 font-semibold text-gray-700 w-1/4">Product:</td>
-                <td className="py-3">{invoice.description}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <h3 className="font-bold text-gray-600 mb-2">Billing summary:</h3>
-          <table className="w-full mb-8">
-            <tbody>
-              <tr className="border-t border-b">
-                <td className="py-2 text-gray-700 w-1/3">Sales Period</td>
-                <td className="py-2 text-right">
-                  {periodStart} - {periodEnd}
-                </td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2 text-gray-700">Amount Due</td>
-                <td className="py-2 text-right font-medium">
-                  {invoice.currency || "USD"} {invoice.amount}
-                </td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2 text-gray-700">Sales Tax</td>
-                <td className="py-2 text-right">0</td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2 font-bold text-gray-800">Total Amount Due</td>
-                <td className="py-2 text-right font-bold text-base">
-                  {invoice.currency || "USD"} {invoice.amount}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div className="flex items-center gap-4 mb-12">
-            <span className="font-bold text-gray-600">Payment terms</span>
-            <span>15 Days</span>
-          </div>
-
-          <h3 className="font-bold text-gray-600 mb-4 border-b pb-1">Transfer Information:</h3>
-          {(() => {
-            const effectiveAccounts =
-              selectedAccounts.length > 0
-                ? selectedAccounts
-                : paymentAccounts.length > 0
-                  ? paymentAccounts
-                  : []
-
-            if (effectiveAccounts.length === 0) {
-              return (
-                <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center text-gray-500 text-xs">
-                  No payment bank account configured yet. Configure your payment bank in the Configuration tab.
-                </div>
-              )
-            }
-
-            return (
-              <div className="space-y-6">
-                {effectiveAccounts.map((acc) => {
-                  const bankName = acc.bank_name || acc.account_name || "Standard Chartered Bank"
-                  const hasStructured = acc.name_on_account || acc.account_number
-
-                  return (
-                    <div key={acc.id} className="grid grid-cols-2 gap-6 border-b pb-4 last:border-0">
-                      <div>
-                        <div className="font-semibold text-gray-700 text-xs uppercase tracking-wider mb-1">
-                          Payment Bank:
-                        </div>
-                        <div className="font-bold text-base text-gray-900">{bankName}</div>
-                        {acc.bank_address && (
-                          <div className="text-gray-600 text-xs mt-1 whitespace-pre-wrap leading-relaxed">
-                            {acc.bank_address}
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        {hasStructured ? (
-                          <div className="space-y-1.5 text-xs sm:text-sm">
-                            <div className="font-semibold text-gray-700 text-xs uppercase tracking-wider mb-1">
-                              Account Details:
-                            </div>
-                            {acc.name_on_account && (
-                              <div>
-                                <span className="font-semibold text-gray-700">Name on Account: </span>
-                                <span className="text-gray-900">{acc.name_on_account}</span>
-                              </div>
-                            )}
-                            {acc.account_number && (
-                              <div>
-                                <span className="font-semibold text-gray-700">Account / IBAN: </span>
-                                <span className="font-mono font-medium text-gray-900">{acc.account_number}</span>
-                              </div>
-                            )}
-                            {acc.bic_swift && (
-                              <div>
-                                <span className="font-semibold text-gray-700">BIC / SWIFT: </span>
-                                <span className="font-mono text-gray-900">{acc.bic_swift}</span>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div>
-                            <div className="font-semibold text-gray-700 text-xs uppercase tracking-wider mb-1">
-                              Account Details:
-                            </div>
-                            <div className="whitespace-pre-wrap text-xs text-gray-700">{acc.account_details}</div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
+        {/* Transfer Information Section */}
+        <div className="text-sm">
+          <div className="font-bold mb-2">Transfer Information:</div>
+          <div className="border border-gray-300 p-4">
+            <div className="border border-black p-4 w-[330px] space-y-3 text-[12.5px] leading-tight">
+              <div>
+                <div className="font-bold">Bank Name:</div>
+                <div className="mt-0.5">{bankName}</div>
               </div>
-            )
-          })()}
+              <div>
+                <div className="font-bold">Bank Address:</div>
+                <div className="mt-0.5 whitespace-pre-line leading-snug">{bankAddress}</div>
+              </div>
+              <div>
+                <div className="font-bold">Name on Account:</div>
+                <div className="mt-0.5">{nameOnAccount}</div>
+              </div>
+              <div>
+                <div className="font-bold">Special Instructions/ Notes:</div>
+                <div className="mt-0.5">{specialInstructions}</div>
+              </div>
+              <div>
+                <div className="font-bold">BIC/SWIFT:</div>
+                <div className="mt-0.5 font-mono">{bicSwift}</div>
+              </div>
+              <div>
+                <div className="font-bold">IBAN/Account Number:</div>
+                <div className="mt-0.5 font-mono">{accountNumber}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     )
