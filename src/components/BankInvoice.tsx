@@ -305,15 +305,17 @@ export const BankInvoice = React.forwardRef<HTMLDivElement, BankInvoiceProps>(
           </div>
 
           <div className="text-right shrink-0">
-            <div className="text-[11px] text-gray-600 mb-0.5">Authorized Signature</div>
-            <div className="inline-block border-b border-gray-400 pb-0.5 px-2">
+            <div className="text-[10.5px] text-gray-500 mb-0.5">Signing Authority</div>
+            <div className="inline-block border-b border-gray-400 pb-0.5 px-2 mb-1">
               <img
                 src="/signature.png"
                 alt="Signature"
                 className="h-8 w-auto object-contain inline-block"
               />
             </div>
-            <div className="text-xs font-bold text-gray-900 mt-1">Themefisher</div>
+            <div className="text-xs font-bold text-gray-900 leading-tight">Mehedi Sharif</div>
+            <div className="text-[11px] text-gray-600 leading-tight">Founder</div>
+            <div className="text-[11.5px] font-bold text-gray-900 leading-tight">Themefisher</div>
           </div>
         </div>
       </div>
