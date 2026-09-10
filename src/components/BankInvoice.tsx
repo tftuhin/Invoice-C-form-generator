@@ -73,7 +73,8 @@ export const BankInvoice = React.forwardRef<HTMLDivElement, BankInvoiceProps>(
 
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <span className="font-bold text-gray-600">CURRENCY -</span> <span>USD</span>
+            <span className="font-bold text-gray-600">CURRENCY -</span>{" "}
+            <span className="font-semibold">{invoice.currency || "USD"}</span>
           </div>
 
           <h3 className="font-bold text-gray-600 mb-2">Order details:</h3>
@@ -97,7 +98,9 @@ export const BankInvoice = React.forwardRef<HTMLDivElement, BankInvoiceProps>(
               </tr>
               <tr className="border-b">
                 <td className="py-2 text-gray-700">Amount Due</td>
-                <td className="py-2 text-right">{invoice.amount}</td>
+                <td className="py-2 text-right font-medium">
+                  {invoice.currency || "USD"} {invoice.amount}
+                </td>
               </tr>
               <tr className="border-b">
                 <td className="py-2 text-gray-700">Sales Tax</td>
@@ -105,7 +108,9 @@ export const BankInvoice = React.forwardRef<HTMLDivElement, BankInvoiceProps>(
               </tr>
               <tr className="border-b">
                 <td className="py-2 font-bold text-gray-800">Total Amount Due</td>
-                <td className="py-2 text-right font-bold">{invoice.amount}</td>
+                <td className="py-2 text-right font-bold text-base">
+                  {invoice.currency || "USD"} {invoice.amount}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -116,65 +121,81 @@ export const BankInvoice = React.forwardRef<HTMLDivElement, BankInvoiceProps>(
           </div>
 
           <h3 className="font-bold text-gray-600 mb-4 border-b pb-1">Transfer Information:</h3>
-          {selectedAccounts.length > 0 ? (
-            <div className="space-y-6">
-              {selectedAccounts.map((acc) => {
-                const bankName = acc.bank_name || acc.account_name || "N/A"
-                const hasStructured = acc.name_on_account || acc.account_number
-                return (
-                  <div key={acc.id} className="grid grid-cols-2 gap-4 border-b pb-4 last:border-0">
-                    <div>
-                      <div className="font-semibold text-gray-700">Bank Name:</div>
-                      <div className="font-bold">{bankName}</div>
-                      {acc.bank_address && (
-                        <div className="text-gray-600 text-xs mt-0.5 whitespace-pre-wrap">{acc.bank_address}</div>
-                      )}
-                    </div>
-                    <div>
-                      {hasStructured ? (
-                        <div className="space-y-1 text-xs sm:text-sm">
-                          {acc.name_on_account && (
-                            <div>
-                              <span className="font-semibold text-gray-700">Name on Account: </span>
-                              <span>{acc.name_on_account}</span>
-                            </div>
-                          )}
-                          {acc.account_number && (
-                            <div>
-                              <span className="font-semibold text-gray-700">Account / IBAN: </span>
-                              <span className="font-mono">{acc.account_number}</span>
-                            </div>
-                          )}
-                          {acc.bic_swift && (
-                            <div>
-                              <span className="font-semibold text-gray-700">BIC / SWIFT: </span>
-                              <span className="font-mono">{acc.bic_swift}</span>
-                            </div>
-                          )}
+          {(() => {
+            const effectiveAccounts =
+              selectedAccounts.length > 0
+                ? selectedAccounts
+                : paymentAccounts.length > 0
+                  ? paymentAccounts
+                  : []
+
+            if (effectiveAccounts.length === 0) {
+              return (
+                <div className="border border-dashed border-gray-300 rounded-lg p-4 text-center text-gray-500 text-xs">
+                  No payment bank account configured yet. Configure your payment bank in the Configuration tab.
+                </div>
+              )
+            }
+
+            return (
+              <div className="space-y-6">
+                {effectiveAccounts.map((acc) => {
+                  const bankName = acc.bank_name || acc.account_name || "Standard Chartered Bank"
+                  const hasStructured = acc.name_on_account || acc.account_number
+
+                  return (
+                    <div key={acc.id} className="grid grid-cols-2 gap-6 border-b pb-4 last:border-0">
+                      <div>
+                        <div className="font-semibold text-gray-700 text-xs uppercase tracking-wider mb-1">
+                          Payment Bank:
                         </div>
-                      ) : (
-                        <div>
-                          <div className="font-semibold text-gray-700">Business Name:</div>
-                          <div className="whitespace-pre-wrap">{acc.account_details}</div>
-                        </div>
-                      )}
+                        <div className="font-bold text-base text-gray-900">{bankName}</div>
+                        {acc.bank_address && (
+                          <div className="text-gray-600 text-xs mt-1 whitespace-pre-wrap leading-relaxed">
+                            {acc.bank_address}
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        {hasStructured ? (
+                          <div className="space-y-1.5 text-xs sm:text-sm">
+                            <div className="font-semibold text-gray-700 text-xs uppercase tracking-wider mb-1">
+                              Account Details:
+                            </div>
+                            {acc.name_on_account && (
+                              <div>
+                                <span className="font-semibold text-gray-700">Name on Account: </span>
+                                <span className="text-gray-900">{acc.name_on_account}</span>
+                              </div>
+                            )}
+                            {acc.account_number && (
+                              <div>
+                                <span className="font-semibold text-gray-700">Account / IBAN: </span>
+                                <span className="font-mono font-medium text-gray-900">{acc.account_number}</span>
+                              </div>
+                            )}
+                            {acc.bic_swift && (
+                              <div>
+                                <span className="font-semibold text-gray-700">BIC / SWIFT: </span>
+                                <span className="font-mono text-gray-900">{acc.bic_swift}</span>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div>
+                            <div className="font-semibold text-gray-700 text-xs uppercase tracking-wider mb-1">
+                              Account Details:
+                            </div>
+                            <div className="whitespace-pre-wrap text-xs text-gray-700">{acc.account_details}</div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="font-semibold text-gray-700">Bank Name:</div>
-                <div className="font-bold">{client.bank_name || "N/A"}</div>
+                  )
+                })}
               </div>
-              <div>
-                <div className="font-semibold text-gray-700">Business Name:</div>
-                <div className="whitespace-pre-wrap">{client.bank_address || "N/A"}</div>
-              </div>
-            </div>
-          )}
+            )
+          })()}
         </div>
       </div>
     )

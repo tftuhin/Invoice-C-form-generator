@@ -58,12 +58,16 @@ CREATE TABLE IF NOT EXISTS invoices (
   client_id UUID REFERENCES clients(id) ON DELETE CASCADE,
   invoice_number TEXT UNIQUE NOT NULL,
   invoice_date DATE,
+  currency TEXT DEFAULT 'USD',
   amount NUMERIC,
   description TEXT,
   received_amount NUMERIC,
   payment_methods JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Migration helpers for invoices table
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'USD';
 
 ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
 

@@ -39,7 +39,7 @@ export const CForm = React.forwardRef<HTMLDivElement, CFormProps>(({ invoice, cl
       </p>
 
       <p className="mb-4">
-        I/We do hereby declare that I/we have received remittance of <strong>USD {amount}</strong> (amount) which is a
+        I/We do hereby declare that I/we have received remittance of <strong>{invoice.currency || "USD"} {amount}</strong> (amount) which is a
         fair value against ICT related services described below in respect of which this declaration is made out and
         that the particulars given below are true:
       </p>

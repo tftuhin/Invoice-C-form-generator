@@ -85,7 +85,7 @@ export default function GenerateDocsPage() {
             <option value="">-- Choose an Invoice --</option>
             {filteredInvoices.map((i) => (
               <option key={i.id} value={i.id}>
-                {i.invoice_number} ({i.invoice_date})
+                {i.invoice_number} ({i.invoice_date}) — {i.currency || "USD"} {i.amount}
               </option>
             ))}
           </select>

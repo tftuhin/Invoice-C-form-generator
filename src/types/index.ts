@@ -39,6 +39,7 @@ export interface Invoice {
   client_id: string
   invoice_number: string
   invoice_date: string
+  currency?: string
   amount: number
   description: string
   received_amount: number
@@ -50,6 +51,7 @@ export interface InvoiceFormData {
   client_id: string
   invoice_number: string
   invoice_date: string
+  currency?: string
   amount: string | number
   description: string
   received_amount?: string | number
